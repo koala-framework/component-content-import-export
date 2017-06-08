@@ -69,10 +69,10 @@ class ExportWorkerCommand extends Command
                 }
             }
             if ($exportData) {
-                $errOutput->writeln("<info>Exported $page->componentId</info>");
+                $errOutput->writeln("<info>Exported $page->dbId</info>");
                 foreach ($exportData as $k=>$i) {
                     if ($i) {
-                        $output->writeln("$page->componentId $k ".str_replace("\n", "\\n", $i));
+                        $output->writeln("$page->dbId $k ".str_replace("\n", "\\n", $i));
                     }
                 }
             }

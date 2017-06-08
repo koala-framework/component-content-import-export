@@ -20,6 +20,7 @@ use ComponentContentImportExport\ExportCommand;
 use ComponentContentImportExport\ImportCommand;
 use ComponentContentImportExport\ExportWorkerCommand;
 use ComponentContentImportExport\ConvertToPoCommand;
+use ComponentContentImportExport\ConvertFromPoCommand;
 
 $application = new Application();
 
@@ -27,5 +28,6 @@ $application->add(new ExportCommand());
 $application->add(new ExportWorkerCommand());
 $application->add(new ImportCommand());
 $application->add(new ConvertToPoCommand());
+$application->add(new ConvertFromPoCommand());
 
 $application->run();
