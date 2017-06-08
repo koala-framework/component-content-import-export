@@ -6,10 +6,11 @@
     "type": "library",
     "require": {
         "koala-framework/koala-framework": "~4.2",
-        "symfony/console": "~2.6"
+        "symfony/console": "~2.6",
+        "sepia/po-parser": "~4.2"
     },
     "autoload": {
-        "psr-0": {
+        "psr-4": {
             "ComponentContentImportExport\\": "src"
         }
     },

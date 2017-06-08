@@ -1,16 +1,31 @@
 #!/usr/bin/php
 <?php
 
-require 'vendor/autoload.php';
+if (!file_exists('bootstrap.php')) {
+    echo "ERROR: Start this script with web in your cwd.\n";
+    exit(1);
+}
+$bootstrap = file_get_contents('bootstrap.php');
+if (!preg_match('#^<\\?php(.*::setUp\\(\\);)#ms', $bootstrap, $m)) {
+    echo "ERROR: couldn't parse bootstrap.\n";
+    exit(1);
+}
+$bootstrap = $m[1];
+$bootstrap = str_replace('__FILE__', "'".getcwd().'/bootstrap.php'."'", $bootstrap);
+eval($bootstrap);
 
 use Symfony\Component\Console\Application;
 
 use ComponentContentImportExport\ExportCommand;
 use ComponentContentImportExport\ImportCommand;
+use ComponentContentImportExport\ExportWorkerCommand;
+use ComponentContentImportExport\ConvertToPoCommand;
 
 $application = new Application();
 
 $application->add(new ExportCommand());
+$application->add(new ExportWorkerCommand());
 $application->add(new ImportCommand());
+$application->add(new ConvertToPoCommand());
 
 $application->run();

@@ -9,7 +9,9 @@ class ImportCommand extends Command
 {
     protected function configure()
     {
-        // ...
+        $this->setName('import')
+            ->setDescription('TBD');
+
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
