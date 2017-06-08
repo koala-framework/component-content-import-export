@@ -1,0 +1,16 @@
+#!/usr/bin/php
+<?php
+
+require 'vendor/autoload.php';
+
+use Symfony\Component\Console\Application;
+
+use ComponentContentImportExport\ExportCommand;
+use ComponentContentImportExport\ImportCommand;
+
+$application = new Application();
+
+$application->add(new ExportCommand());
+$application->add(new ImportCommand());
+
+$application->run();

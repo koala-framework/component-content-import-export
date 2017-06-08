@@ -1,0 +1,19 @@
+{
+    "name": "koala-framework/component-content-import-export",
+    "description": "",
+    "homepage": "https://github.com/koala-framework/component-content-import-export",
+    "license": "BSD-2-Clause",
+    "type": "library",
+    "require": {
+        "koala-framework/koala-framework": "~4.2",
+        "symfony/console": "~2.6"
+    },
+    "autoload": {
+        "psr-0": {
+            "ComponentContentImportExport\\": "src"
+        }
+    },
+    "bin": ["bin/component-content-import-export"],
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
