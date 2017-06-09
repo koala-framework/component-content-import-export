@@ -1,10 +1,14 @@
 <?php
 namespace ComponentContentImportExport;
 
-use Sepia\PoParser;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Geekwright\Po\PoHeader;
+use Geekwright\Po\PoTokens;
+use Geekwright\Po\PoFile;
+use Geekwright\Po\PoEntry;
 
 class ConvertFromPoCommand extends Command
 {
@@ -15,6 +19,8 @@ class ConvertFromPoCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $errOutput = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
+
         if (0 === ftell(STDIN)) {
             $contents = '';
             while (!feof(STDIN)) {
@@ -24,15 +30,17 @@ class ConvertFromPoCommand extends Command
             throw new \RuntimeException("Please pipe content to STDIN.");
         }
 
-        $poFile = new PoParser(new \Sepia\StringHandler($contents));
-        foreach ($poFile->parse() as $poElement) {
-            if (!isset($poElement['msgid'])) {
-                continue;
+        $poFile = new PoFile();
+        $poFile->parsePoSource($contents);
+        foreach ($poFile->getEntries() as $entry) {
+            $message = $entry->getAsString(PoTokens::MESSAGE);
+            $translated = $entry->getAsString(PoTokens::TRANSLATED);
+            $reference = $entry->getAsString(PoTokens::REFERENCE);
+            if (!$reference) {
+                $errOutput->writeln("<error>missing reference for $message</error>");
             }
-            $msgstr = implode("", $poElement['msgstr']);
-            $msgid = implode("", $poElement['msgid']);
-            if ($msgid) {
-                $output->writeln($msgid.' '.str_replace("\n", "\\n", $msgstr));
+            if ($translated) {
+                $output->writeln($reference.' '.str_replace("\n", "\\n", $translated));
             }
         }
     }
