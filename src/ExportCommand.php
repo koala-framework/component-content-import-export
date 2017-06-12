@@ -29,6 +29,7 @@ class ExportCommand extends Command
         while (true) {
             $cmd = "php vendor/bin/component-content-import-export export:worker";
             $process = new Process($cmd);
+            $process->setTimeout(0);
             $this->getHelper('process')->mustRun($output, $process, 'export:worker failed', function ($type, $data) use ($output, $errOutput) {
                 if (Process::ERR === $type) {
                     $errOutput->write($data);

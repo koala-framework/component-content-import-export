@@ -31,15 +31,21 @@ class ConvertToPoCommand extends Command
             throw new \RuntimeException("Please pipe content to STDIN.");
         }
 
+        $data = array();
         $contents = explode("\n", $contents);
         foreach ($contents as $exportData) {
             if (preg_match('#([^ ]+) ([^ ]+) (.*)#', $exportData, $m)) {
-                $entry = new PoEntry;
-                $entry->set(PoTokens::MESSAGE, str_replace("\\n", "\n", $m[3]));
-                //$entry->set(PoTokens::CONTEXT, $m[1].' '.$m[2]);
-                $entry->set(PoTokens::REFERENCE, $m[1].' '.$m[2]);
-                $poFile->addEntry($entry);
+                $reference = $m[1].' '.$m[2];
+                $message = $m[3];
+                if (!isset($data[$message])) $data[$message] = array();
+                $data[$message][] = $reference;
             }
+        }
+        foreach ($data as $message=>$references) {
+            $entry = new PoEntry;
+            $entry->set(PoTokens::MESSAGE, str_replace("\\n", "\n", $message));
+            $entry->set(PoTokens::REFERENCE, implode(', ', $references));
+            $poFile->addEntry($entry);
         }
 
         $output->writeln($poFile->dumpString());

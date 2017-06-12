@@ -35,12 +35,15 @@ class ConvertFromPoCommand extends Command
         foreach ($poFile->getEntries() as $entry) {
             $message = $entry->getAsString(PoTokens::MESSAGE);
             $translated = $entry->getAsString(PoTokens::TRANSLATED);
-            $reference = $entry->getAsString(PoTokens::REFERENCE);
-            if (!$reference) {
+            $references = $entry->getAsString(PoTokens::REFERENCE);
+            if (!$references) {
                 $errOutput->writeln("<error>missing reference for $message</error>");
             }
+            $references = explode(', ', $references);
             if ($translated) {
-                $output->writeln($reference.' '.str_replace("\n", "\\n", $translated));
+                foreach ($references as $reference) {
+                    $output->writeln($reference.' '.str_replace("\n", "\\n", $translated));
+                }
             }
         }
     }
