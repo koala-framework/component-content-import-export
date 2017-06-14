@@ -44,7 +44,7 @@ class ConvertToPoCommand extends Command
         foreach ($data as $message=>$references) {
             $entry = new PoEntry;
             $entry->set(PoTokens::MESSAGE, str_replace("\\n", "\n", $message));
-            $entry->set(PoTokens::REFERENCE, implode(', ', $references));
+            $entry->set(PoTokens::REFERENCE, $references);
             $poFile->addEntry($entry);
         }
 
