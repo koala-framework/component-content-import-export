@@ -34,8 +34,8 @@ class ConvertToPoCommand extends Command
         $data = array();
         $contents = explode("\n", $contents);
         foreach ($contents as $exportData) {
-            if (preg_match('#([^ ]+) ([^ ]+) (.*)#', $exportData, $m)) {
-                $reference = $m[1].' '.$m[2];
+            if (preg_match('#([^ ]+):([^ ]+) (.*)#', $exportData, $m)) {
+                $reference = $m[1].':'.$m[2];
                 $message = $m[3];
                 if (!isset($data[$message])) $data[$message] = array();
                 $data[$message][] = $reference;

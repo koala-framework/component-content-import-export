@@ -72,7 +72,7 @@ class ExportWorkerCommand extends Command
                 $errOutput->writeln("<info>Exported $page->dbId</info>");
                 foreach ($exportData as $k=>$i) {
                     if ($i) {
-                        $output->writeln("$page->dbId $k ".str_replace("\n", "\\n", $i));
+                        $output->writeln("$page->dbId:$k ".str_replace("\n", "\\n", $i));
                     }
                 }
             }

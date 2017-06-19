@@ -17,6 +17,8 @@ class ImportCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        set_time_limit(0);
+
         $errOutput = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
 
         if (0 === ftell(STDIN)) {
@@ -31,7 +33,7 @@ class ImportCommand extends Command
         $dataByComponentId = array();
         $contents = explode("\n", $contents);
         foreach ($contents as $exportData) {
-            if (preg_match('#([^ ]+) ([^ ]+) (.*)#', $exportData, $m)) {
+            if (preg_match('#([^ ]+):([^ ]+) (.*)#', $exportData, $m)) {
                 $componentId = $m[1];
                 if (!isset($dataByComponentId[$componentId])) $dataByComponentId[$componentId] = array();
                 $dataByComponentId[$componentId][$m[2]] = str_replace("\\n", "\n", $m[3]);
@@ -59,6 +61,10 @@ class ImportCommand extends Command
                 }
             } else {
                 $errOutput->writeln("<error>$componentId not found</error>");
+            }
+            \Kwf_Component_Data_Root::getInstance()->freeMemory();
+            if ($errOutput->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                $errOutput->writeln("<info>" . round(memory_get_usage() / 1024 / 1024) . "MB memory usage</info>");
             }
         }
     }
