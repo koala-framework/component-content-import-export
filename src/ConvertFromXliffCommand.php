@@ -3,31 +3,32 @@ namespace ComponentContentImportExport;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Geekwright\Po\PoHeader;
-use Geekwright\Po\PoTokens;
-use Geekwright\Po\PoFile;
-use Geekwright\Po\PoEntry;
+use ComponentContentImportExport\XliffDocument;
+use DOMDocument;
 
-class ConvertFromPoCommand extends ConvertAbstractCommand
+class ConvertFromXliffCommand extends ConvertAbstractCommand
 {
     protected function configure()
     {
-        $this->setName('convert:from-po');
+        $this->setName('convert:from-xliff');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output)
     {
         $errOutput = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
         $contents = $this->readInput($input, $output);
 
-        $poFile = new PoFile();
-        $poFile->parsePoSource($contents);
-        foreach ($poFile->getEntries() as $entry) {
-            $message = $entry->getAsString(PoTokens::MESSAGE);
-            $translated = $entry->getAsString(PoTokens::TRANSLATED);
-            $references = explode(' ', implode(' ', $entry->getAsStringArray(PoTokens::REFERENCE)));
+        $dom = new DOMDocument();
+        $dom->loadXML($contents);
+        $xliff =  XliffDocument::fromDom($dom);
+
+        foreach ($xliff->file()->body()->units() as $unit) {
+            $message    = ($unit->source() ? $unit->source()->getTextContent() : false);
+            $translated = ($unit->target() ? $unit->target()->getTextContent() : false);
+            if (!$message || !$translated) continue;
+
+            $references = explode(";", $unit->getAttribute('resname'));
             if (!$references) {
                 $errOutput->writeln("<error>missing reference for $message</error>");
             }

@@ -21,6 +21,8 @@ use ComponentContentImportExport\ImportCommand;
 use ComponentContentImportExport\ExportWorkerCommand;
 use ComponentContentImportExport\ConvertToPoCommand;
 use ComponentContentImportExport\ConvertFromPoCommand;
+use ComponentContentImportExport\ConvertToXliffCommand;
+use ComponentContentImportExport\ConvertFromXliffCommand;
 use ComponentContentImportExport\TranslatePoToXxxCommand;
 
 $application = new Application();
@@ -30,6 +32,8 @@ $application->add(new ExportWorkerCommand());
 $application->add(new ImportCommand());
 $application->add(new ConvertToPoCommand());
 $application->add(new ConvertFromPoCommand());
+$application->add(new ConvertToXliffCommand());
+$application->add(new ConvertFromXliffCommand());
 $application->add(new TranslatePoToXxxCommand());
 
 $application->run();

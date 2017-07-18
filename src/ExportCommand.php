@@ -8,6 +8,8 @@ use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
+ini_set('max_execution_time', 0);
+
 class ExportCommand extends Command
 {
     protected function configure()
@@ -29,7 +31,8 @@ class ExportCommand extends Command
         while (true) {
             $cmd = "php vendor/bin/component-content-import-export export:worker";
             $process = new Process($cmd);
-            $process->setTimeout(0);
+
+            $process->setTimeout(null);
             $this->getHelper('process')->mustRun($output, $process, 'export:worker failed', function ($type, $data) use ($output, $errOutput) {
                 if (Process::ERR === $type) {
                     $errOutput->write($data);
