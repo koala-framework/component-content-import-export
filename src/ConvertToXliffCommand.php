@@ -19,19 +19,24 @@ class ConvertToXliffCommand extends ConvertAbstractCommand
     {
         $xliff = new XliffDocument();
         $xliff->file(true)->body(true);
+        $xliff->file()->setAttribute('original', 'db_export')
+                      ->setAttribute('source-language', 'de-AT')
+                      ->setAttribute('datatype', 'database');
 
         $contents = $this->readInput($input, $output);
         $data = $this->parseIdAndContents($contents);
 
+        $counter = 0;
         foreach ($data as $message=>$references) {
-            $xliff->file()->body()->unit(true)->source(true)->setTextContent($message);
+            $xliff->file()->body()->unit(true)->setAttribute('id', $counter)
+                                              ->source(true)->setTextContent($message);
             $refAppend = '';
             foreach ($references as $ref) {
                 $refAppend .= $ref;
                 if ($ref !== end($references)) $refAppend .= ';';
             }
-            $refAppend = $refAppend;
             $xliff->file()->body()->unit()->setAttribute('resname', $refAppend);
+            $counter++;
         }
         $format = $xliff->toDOM();
         $format->preserveWhiteSpace = false;
