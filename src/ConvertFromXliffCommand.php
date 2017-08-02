@@ -12,6 +12,7 @@ class ConvertFromXliffCommand extends ConvertAbstractCommand
     protected function configure()
     {
         $this->setName('convert:from-xliff');
+        $this->setDescription('Converts a xliff-document into the format that can be used for import.');
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
@@ -21,16 +22,26 @@ class ConvertFromXliffCommand extends ConvertAbstractCommand
 
         $dom = new DOMDocument();
         $dom->loadXML($contents);
-        $xliff =  XliffDocument::fromDom($dom);
+        $xliff = XliffDocument::fromDom($dom);
 
         foreach ($xliff->file()->body()->units() as $unit) {
-            $message    = ($unit->source() ? $unit->source()->getTextContent() : false);
-            $translated = ($unit->target() ? $unit->target()->getTextContent() : false);
-            if (!$message) continue;
-            if (!$translated) {
-                $translated = ($unit->target()->mrk() ? $unit->target()->mrk()->getTextContent() : false);
-            }
+            if ($unit->source() && empty($unit->source()->getTextContent())) continue;
+            $translated = false;
+            $translated = $unit->target() ? $unit->target()->getTextContent() : false;
 
+            if (empty(trim(strip_tags($translated)))) $translated = false;
+            if (!$translated) {
+                $translated = '';
+                if ($unit->target()) {
+                    foreach ($unit->target()->mrks() as $mrk) {
+                        $translated .= $mrk->getTextContent();
+                    }
+                }
+            }
+            $translated = str_replace(chr(0xe3).chr(0x80).chr(0x80), ' ', $translated);
+            if (empty(trim(strip_tags($translated)))) {
+                $translated = false;
+            }
             $references = explode(";", $unit->getAttribute('resname'));
             if (!$references) {
                 $errOutput->writeln("<error>missing reference for $message</error>");

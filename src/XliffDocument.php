@@ -427,7 +427,7 @@ class XliffUnitsGroup extends XliffNode
 {
     protected $name = 'group';
     protected $supportedContainers = array(
-        'trans-units'		=> 'ComponentContentImportExport\XliffUnit'
+        'trans-units' => 'ComponentContentImportExport\XliffUnit'
     );
 }
 
@@ -457,7 +457,7 @@ class XliffSource extends XliffNode
 {
     protected $name = 'source';
     protected $supportedNodes = array(
-        'mrk'        => 'ComponentContentImportExport\XliffNode'
+        'mrk' => 'ComponentContentImportExport\XliffNode'
     );
 }
 
@@ -465,11 +465,15 @@ class XliffSource extends XliffNode
  * Concrete class for target tag
  *
  * @method XliffNode mrk()
+ * @method array marks()
  */
 class XliffTarget extends XliffNode
 {
     protected $name = 'target';
     protected $supportedNodes = array(
-        'mrk'        => 'ComponentContentImportExport\XliffNode'
+        'mrk'   => 'ComponentContentImportExport\XliffNode'
+    );
+    protected $supportedContainers = array(
+        'mrks'  => 'ComponentContentImportExport\XliffNode'
     );
 }

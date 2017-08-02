@@ -14,12 +14,14 @@ class ConvertToXliffCommand extends ConvertAbstractCommand
     protected function configure()
     {
         $this->setName('convert:to-xliff');
-        $this->addOption('source-lang', null, InputOption::VALUE_REQUIRED,
-            'Defines the source-language attribute for the whole file');
+        $this->setDescription('Converts a exported document to the xliff format.');
+        $this->addOption('source-lang', 'l', InputOption::VALUE_REQUIRED,
+            'Defines the source-language attribute for the whole document');
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        $errOutput = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
         $xliff = new XliffDocument();
         $xliff->file(true)->body(true);
 
@@ -34,9 +36,9 @@ class ConvertToXliffCommand extends ConvertAbstractCommand
 
         $counter = 0;
         foreach ($data as $message=>$references) {
-            $xliff->file()->body()->unit(true)->setAttribute('id', $counter)
-                                              ->source(true)->setTextContent(
-                                                  str_replace("\\n", "\n", $message));
+            $unit = $xliff->file()->body()->unit(true)->setAttribute('id', $counter)
+                          ->source(true)->setTextContent(str_replace("\\n", "\n", $message));
+
             $refAppend = '';
             foreach ($references as $ref) {
                 $refAppend .= $ref;
