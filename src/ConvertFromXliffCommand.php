@@ -26,7 +26,6 @@ class ConvertFromXliffCommand extends ConvertAbstractCommand
 
         foreach ($xliff->file()->body()->units() as $unit) {
             if ($unit->source() && empty($unit->source()->getTextContent())) continue;
-            $translated = false;
             $translated = $unit->target() ? $unit->target()->getTextContent() : false;
 
             if (empty(trim(strip_tags($translated)))) $translated = false;

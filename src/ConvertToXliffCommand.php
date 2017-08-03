@@ -16,7 +16,7 @@ class ConvertToXliffCommand extends ConvertAbstractCommand
         $this->setName('convert:to-xliff');
         $this->setDescription('Converts a exported document to the xliff format.');
         $this->addOption('source-lang', 'l', InputOption::VALUE_REQUIRED,
-            'Defines the source-language attribute for the whole document');
+            'Defines the source-language attribute for the whole document', 'de-AT');
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
@@ -25,7 +25,7 @@ class ConvertToXliffCommand extends ConvertAbstractCommand
         $xliff = new XliffDocument();
         $xliff->file(true)->body(true);
 
-        $sourceLang = !$input->getOption('source-lang') ? 'de-AT' : $input->getOption('source-lang');
+        $sourceLang = $input->getOption('source-lang');
 
         $xliff->file()->setAttribute('original', 'db_export')
                       ->setAttribute('source-language', $sourceLang)
