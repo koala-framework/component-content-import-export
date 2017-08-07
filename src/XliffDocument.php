@@ -25,7 +25,6 @@ class XliffNode
         'trans-unit'=> 'ComponentContentImportExport\XliffUnit',
         'source'	=> 'ComponentContentImportExport\XliffSource',
         'target'	=> 'ComponentContentImportExport\XliffTarget',
-        'mrk'       => 'ComponentContentImportExport\XliffNode',
         'mrk'       => 'ComponentContentImportExport\XliffNode'
     );
 
@@ -168,11 +167,9 @@ class XliffNode
         //Automatically detect where to append this node
         if (!empty($this->supportedContainers[$node->getName().'s'])) {
             $this->containers[$node->getName().'s'][] = $node;
-        }
-        elseif(!empty($this->supportedNodes[$node->getName()])) {
+        } elseif(!empty($this->supportedNodes[$node->getName()])) {
             $this->nodes[$node->getName()] = $node;
-        }
-        else {
+        } else {
             $this->nodes[$node->getName()] = $node;
         }
         return $this;
@@ -200,10 +197,9 @@ class XliffNode
         $name = preg_replace(array_keys($mapNames), array_values($mapNames), $name);
 
         //plural ?
-        if (!empty($this->supportedContainers[$name]) ) {
+        if (!empty($this->supportedContainers[$name])) {
             return $this->containers[$name];
-        }
-        elseif (!empty($this->supportedContainers[$name.'s'])) {
+        } elseif (!empty($this->supportedContainers[$name.'s'])) {
             $pluralName= $name.'s';
 
             //Create new instance if explicitly specified by argument
@@ -222,7 +218,6 @@ class XliffNode
                 $this->nodes[$name] = new $cls();
                 $this->nodes[$name]->setName($name);
             }
-
             return (!empty($this->nodes[$name])) ? $this->nodes[$name] : FALSE;
         }
         throw new \Exception(sprintf("'%s' is not supported for '%s'",$name,get_class($this)));
@@ -264,16 +259,14 @@ class XliffNode
     {
         if ($element instanceOf DOMText) {
             return $element->nodeValue;
-        }
-        else {
+        } else {
             $name = $element->tagName;
 
             //check if tag is supported
             if (empty(self::$mapNameToClass[$element->tagName])) {
                 $cls = 'ComponentContentImportExport\XliffNode';
                 //throw new \Exception(sprintf("Tag name '%s' is unsupported",$name));
-            }
-            else {
+            } else {
                 //Create the XliffNode object (concrete object)
                 $cls = self::$mapNameToClass[$element->tagName];
             }
@@ -281,22 +274,21 @@ class XliffNode
             /* @var $node XliffNode */
 
             //Import attributes
-            foreach ($element->attributes as $attrNode){
+            foreach ($element->attributes as $attrNode) {
                 $node->setAttribute($attrNode->nodeName, $attrNode->nodeValue);
             }
 
             //Continue to nested nodes
-            foreach($element->childNodes as $child){
+            foreach($element->childNodes as $child) {
                 $res = self::fromDOMElement($child);
                 if (is_string($res)){
                     $node->setTextContent($res);
-                }else{
+                } else {
                     $node->appendNode($res);
                 }
             }
         }
         return $node;
-
     }
 }
 
@@ -320,7 +312,7 @@ class XliffDocument extends XliffNode
 
     protected $version;
 
-    function __construct(){
+    function __construct() {
         parent::__construct();
         $this->version = '1.2';
     }
@@ -470,10 +462,10 @@ class XliffSource extends XliffNode
 class XliffTarget extends XliffNode
 {
     protected $name = 'target';
-    protected $supportedNodes = array(
-        'mrk'   => 'ComponentContentImportExport\XliffNode'
-    );
     protected $supportedContainers = array(
         'mrks'  => 'ComponentContentImportExport\XliffNode'
+    );
+    protected $supportedNodes = array(
+        'mrk'   => 'ComponentContentImportExport\XliffNode'
     );
 }
