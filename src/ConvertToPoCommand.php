@@ -14,6 +14,7 @@ class ConvertToPoCommand extends ConvertAbstractCommand
     protected function configure()
     {
         $this->setName('convert:to-po');
+        $this->setDescription('Converts a po-document into the format that can be used for import.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
