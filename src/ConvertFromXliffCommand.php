@@ -25,10 +25,10 @@ class ConvertFromXliffCommand extends ConvertAbstractCommand
         $xliff = XliffDocument::fromDom($dom);
 
         foreach ($xliff->file()->body()->units() as $unit) {
-            if ($unit->source() && empty($unit->source()->getTextContent())) continue;
+            if ($unit->source() && $unit->source()->getTextContent() == '') continue;
             $translated = $unit->target() ? $unit->target()->getTextContent() : false;
 
-            if (empty(trim(strip_tags($translated)))) $translated = false;
+            if (trim(strip_tags($translated)) == '') $translated = false;
             if (!$translated) {
                 $translated = '';
                 if ($unit->target()) {
@@ -38,12 +38,12 @@ class ConvertFromXliffCommand extends ConvertAbstractCommand
                 }
             }
             $translated = str_replace(chr(0xe3).chr(0x80).chr(0x80), ' ', $translated);
-            if (empty(trim(strip_tags($translated)))) {
+            if (trim(strip_tags($translated)) == '') {
                 $translated = false;
             }
             $references = explode(";", $unit->getAttribute('resname'));
             if (!$references) {
-                $errOutput->writeln("<error>missing reference for $message</error>");
+                $errOutput->writeln("<error>missing reference for $unit->source()->getTextContent</error>");
             }
             if ($translated) {
                 foreach ($references as $reference) {
