@@ -44,7 +44,7 @@ class ConvertFromXliffCommand extends ConvertAbstractCommand
             }
             $references = explode(";", $unit->getAttribute('resname'));
             if (!$references) {
-                $errOutput->writeln("<error>missing reference for $unit->source()->getTextContent</error>");
+                $errOutput->writeln("<error>missing reference for {$unit->source()->getTextContent()}</error>");
             }
             if ($translated) {
                 foreach ($references as $reference) {
