@@ -3,6 +3,7 @@ namespace ComponentContentImportExport;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use ComponentContentImportExport\XliffDocument;
 use DOMDocument;
