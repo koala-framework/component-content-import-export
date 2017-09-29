@@ -18,6 +18,7 @@ class ImportCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         set_time_limit(0);
+        ini_set('memory_limit', '512M');
 
         $errOutput = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
 
@@ -40,6 +41,8 @@ class ImportCommand extends Command
             }
         }
 
+        $componentCount = count($dataByComponentId);
+        $counter = 1;
         foreach ($dataByComponentId as $componentId=>$data) {
             $cmpData = array();
             $genData = array();
@@ -65,6 +68,8 @@ class ImportCommand extends Command
             \Kwf_Component_Data_Root::getInstance()->freeMemory();
             if ($errOutput->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                 $errOutput->writeln("<info>" . round(memory_get_usage() / 1024 / 1024) . "MB memory usage</info>");
+                $errOutput->writeln("<info>Component " . $counter . " of " . $componentCount . " imported</info>");
+                $counter++;
             }
         }
     }
