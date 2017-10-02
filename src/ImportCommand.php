@@ -3,6 +3,7 @@ namespace ComponentContentImportExport;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -11,7 +12,9 @@ class ImportCommand extends Command
     protected function configure()
     {
         $this->setName('import')
-            ->setDescription('TBD');
+             ->setDescription('TBD');
+        $this->addOption('subrootId', 's', InputOption::VALUE_REQUIRED,
+            'Defines component subroot for import. Components of another subroot will not be imported');
 
     }
 
@@ -19,8 +22,11 @@ class ImportCommand extends Command
     {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-
         $errOutput = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
+
+        if (!($subrootId = $input->getOption('subrootId'))) {
+            throw new \RuntimeException("no subrootId provided.");
+        }
 
         if (0 === ftell(STDIN)) {
             $contents = '';
@@ -54,7 +60,7 @@ class ImportCommand extends Command
                 }
             }
             $cmp = \Kwf_Component_Data_Root::getInstance()->getComponentByDbId($componentId, array('ignoreVisible' => true, 'limit'=>1));
-            if ($cmp) {
+            if ($cmp && $cmp->getSubroot()->componentId == $subrootId) {
                 $errOutput->writeln("<info>Importing $componentId</info>");
                 if ($cmpData) {
                     \Kwc_Abstract_Admin::getInstance($cmp->componentClass)->importContent($cmp, $cmpData);
@@ -62,15 +68,21 @@ class ImportCommand extends Command
                 if ($genData) {
                     $cmp->generator->importContent($cmp, $genData);
                 }
+                if ($errOutput->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                    $errOutput->writeln("<info>Component " . $counter . " of " . $componentCount . " imported</info>");
+                }
             } else {
-                $errOutput->writeln("<error>$componentId not found</error>");
+                if ($cmp && $cmp->getSubroot()->componentId != $subrootId) {
+                    $errOutput->writeln("<error>$componentId not in subroot ({$cmp->getSubroot()->componentId})</error>");
+                } else {
+                    $errOutput->writeln("<error>$componentId not found</error>");
+                }
             }
             \Kwf_Component_Data_Root::getInstance()->freeMemory();
             if ($errOutput->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                 $errOutput->writeln("<info>" . round(memory_get_usage() / 1024 / 1024) . "MB memory usage</info>");
-                $errOutput->writeln("<info>Component " . $counter . " of " . $componentCount . " imported</info>");
-                $counter++;
             }
+            $counter++;
         }
     }
 }
