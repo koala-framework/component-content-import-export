@@ -45,7 +45,7 @@ class ExportWorkerCommand extends Command
             if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                 $errOutput->write("==> " . $componentId);
             }
-            $page = \Kwf_Component_Data_Root::getInstance()->getComponentById($componentId);
+            $page = \Kwf_Component_Data_Root::getInstance()->getComponentById($componentId, array('ignoreVisible' => true));
             if (!$page) {
                 throw new \Exception("$componentId not found");
                 continue;
