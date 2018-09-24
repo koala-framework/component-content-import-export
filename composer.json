@@ -5,7 +5,7 @@
     "license": "BSD-2-Clause",
     "type": "library",
     "require": {
-        "koala-framework/koala-framework": "~4.2",
+        "koala-framework/koala-framework": "~4.0 | ~5.0",
         "symfony/console": "~2.6",
         "geekwright/po": "^1.0"
     },
