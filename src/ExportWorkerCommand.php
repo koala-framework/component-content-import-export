@@ -3,6 +3,7 @@ namespace ComponentContentImportExport;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 
@@ -11,6 +12,7 @@ class ExportWorkerCommand extends Command
     protected function configure()
     {
         $this->setName('export:worker')
+            ->addOption('addInvisibleChildComponents', 'aiccmp', InputOption::VALUE_OPTIONAL, 'Include all invisible child-components.')
             //->setHidden(true)
         ;
     }
@@ -54,8 +56,9 @@ class ExportWorkerCommand extends Command
                 $errOutput->writeLn(" :: $page->url");
             }
 
-            $childPages = $page->getChildComponents();
-            foreach ($childPages as $c) {
+            $select = new \Kwf_Component_Select();
+            if ($input->hasOption('addInvisibleChildComponents')) $select->ignoreVisible(true);
+            foreach ($page->getChildComponents($select) as $c) {
                 if ($c->parent->componentId != $page->componentId) continue; //skip unique box under other parent
                 $errOutput->writeLn("queued $c->componentId", OutputInterface::VERBOSITY_VERBOSE);
                 $queue[] = $c->componentId;

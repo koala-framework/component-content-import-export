@@ -16,6 +16,7 @@ class ExportCommand extends Command
     {
         $this->setName('export')
             ->addOption('component-id', null, InputOption::VALUE_REQUIRED, 'Component ID where the export should start.', 'root')
+            ->addOption('addInvisibleChildComponents', 'aiccmp', InputOption::VALUE_OPTIONAL, 'Include all invisible child-components.')
             ->setDescription('Export Component Content');
     }
 
@@ -30,6 +31,9 @@ class ExportCommand extends Command
 
         while (true) {
             $cmd = "php vendor/bin/component-content-import-export export:worker";
+            if ($input->hasOption('addInvisibleChildComponents')) {
+                $cmd .= " --addInvisibleChildComponents";
+            }
             $process = new Process($cmd);
 
             $process->setTimeout(null);
