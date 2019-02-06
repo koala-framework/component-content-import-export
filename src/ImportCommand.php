@@ -15,6 +15,8 @@ class ImportCommand extends Command
              ->setDescription('TBD');
         $this->addOption('subrootId', 's', InputOption::VALUE_REQUIRED,
             'Defines component subroot for import. Components of another subroot will not be imported');
+        $this->addOption('listImportedComponentIds', 'l', InputOption::VALUE_OPTIONAL,
+            'List all successfully imported componentIds.', false);
 
     }
 
@@ -47,6 +49,7 @@ class ImportCommand extends Command
             }
         }
 
+        $importedComponentIds = array();
         $componentCount = count($dataByComponentId);
         $counter = 1;
         foreach ($dataByComponentId as $componentId=>$data) {
@@ -64,6 +67,7 @@ class ImportCommand extends Command
                 $errOutput->writeln("<info>Importing $componentId</info>");
                 if ($cmpData) {
                     \Kwc_Abstract_Admin::getInstance($cmp->componentClass)->importContent($cmp, $cmpData);
+                    $importedComponentIds[] = $componentId;
                 }
                 if ($genData) {
                     $cmp->generator->importContent($cmp, $genData);
@@ -83,6 +87,13 @@ class ImportCommand extends Command
                 $errOutput->writeln("<info>" . round(memory_get_usage() / 1024 / 1024) . "MB memory usage</info>");
             }
             $counter++;
+        }
+
+        if ($input->hasOption('listImportedComponentIds')) {
+            $output->writeln('-- listImportedComponentIds');
+            foreach ($importedComponentIds as $componentId) {
+                $output->writeln($componentId);
+            }
         }
     }
 }
