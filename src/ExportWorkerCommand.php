@@ -27,7 +27,6 @@ class ExportWorkerCommand extends Command
         $queueFile = 'temp/componentContentExportQueue';
 
         while (true) {
-
             $errOutput->writeLn("memory_usage (child): ".(memory_get_usage()/(1024*1024))."MB", OutputInterface::VERBOSITY_VERY_VERBOSE);
             if (memory_get_usage() > 128*1024*1024) {
                 $errOutput->writeln("new process...");
@@ -59,6 +58,7 @@ class ExportWorkerCommand extends Command
             $select = new \Kwf_Component_Select();
             if ($input->hasOption('addInvisibleChildComponents')) $select->ignoreVisible(true);
             foreach ($page->getChildComponents($select) as $c) {
+                if (\Kwc_Abstract::getFlag($c->componentClass, 'skipContentExportRecursive')) continue;
                 if ($c->parent->componentId != $page->componentId) continue; //skip unique box under other parent
                 $errOutput->writeLn("queued $c->componentId", OutputInterface::VERBOSITY_VERBOSE);
                 $queue[] = $c->componentId;
