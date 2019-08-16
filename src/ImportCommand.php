@@ -15,6 +15,8 @@ class ImportCommand extends Command
              ->setDescription('TBD');
         $this->addOption('subrootId', 's', InputOption::VALUE_REQUIRED,
             'Defines component subroot for import. Components of another subroot will not be imported');
+        $this->addOption('isTrl', 't', InputOption::VALUE_OPTIONAL,
+            'Set to true if import is used for trl. Parameter subrootId has to be the subroot of the trl-master-component');
         $this->addOption('listImportedComponentIds', 'l', InputOption::VALUE_OPTIONAL,
             'List all successfully imported componentIds.', false);
 
@@ -26,6 +28,7 @@ class ImportCommand extends Command
         ini_set('memory_limit', '512M');
         $errOutput = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
 
+        $isTrl = $input->getOption('isTrl');
         if (!($subrootId = $input->getOption('subrootId'))) {
             throw new \RuntimeException("no subrootId provided.");
         }
@@ -49,10 +52,31 @@ class ImportCommand extends Command
             }
         }
 
+        if ($isTrl) {
+            $chainedMasterComponent = \Kwf_Component_Data_Root::getInstance()->getComponentByDbId($subrootId, array('ignoreVisible' => true, 'limit'=>1));
+            if (!$chainedMasterComponent) {
+                $errOutput->writeln("<error>Chained Master Component $subrootId not found</error>");
+                return;
+            }
+        }
         $importedComponentIds = array();
         $componentCount = count($dataByComponentId);
         $counter = 1;
         foreach ($dataByComponentId as $componentId=>$data) {
+            $cmp = \Kwf_Component_Data_Root::getInstance()->getComponentByDbId($componentId, array('ignoreVisible' => true, 'limit'=>1));
+            if (!$cmp) {
+                $errOutput->writeln("<error>Component $componentId not found</error>");
+                continue;
+            }
+            if ($isTrl) {
+                $cmp = \Kwc_Chained_Abstract_Component::getChainedByMaster($cmp, $chainedMasterComponent, 'Trl', array('ignoreVisible' => true));
+                if (!$cmp) {
+                    $errOutput->writeln("<error>Chained Component for $componentId not found</error>");
+                    continue;
+                }
+                $componentId = $cmp->componentId;
+            }
+
             $cmpData = array();
             $genData = array();
             foreach ($data as $k=>$i) {
@@ -62,7 +86,7 @@ class ImportCommand extends Command
                     $cmpData[$k] = $i;
                 }
             }
-            $cmp = \Kwf_Component_Data_Root::getInstance()->getComponentByDbId($componentId, array('ignoreVisible' => true, 'limit'=>1));
+
             if ($cmp && $cmp->getSubroot()->componentId == $subrootId) {
                 $errOutput->writeln("<info>Importing $componentId</info>");
                 if ($cmpData) {
@@ -82,6 +106,11 @@ class ImportCommand extends Command
                     $errOutput->writeln("<error>$componentId not found</error>");
                 }
             }
+
+            if ($isTrl) {
+                $this->_setVisibleRecursive($cmp);
+            }
+
             \Kwf_Component_Data_Root::getInstance()->freeMemory();
             if ($errOutput->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                 $errOutput->writeln("<info>" . round(memory_get_usage() / 1024 / 1024) . "MB memory usage</info>");
@@ -89,11 +118,28 @@ class ImportCommand extends Command
             $counter++;
         }
 
-        if ($input->hasOption('listImportedComponentIds')) {
+        if ($input->hasOption('listImportedComponentIds') && $input->getOption('listImportedComponentIds')) {
             $output->writeln('-- listImportedComponentIds');
             foreach ($importedComponentIds as $componentId) {
                 $output->writeln($componentId);
             }
+        }
+    }
+
+    private function _setVisibleRecursive($cmp)
+    {
+        $saveParent = true;
+        if (isset($cmp->row) && isset($cmp->row->visible)) {
+            if ($cmp->row->getModel() instanceof Kwc_Root_Category_Trl_GeneratorModel) return;
+            if ($cmp->row->visible) {
+                $saveParent = false;
+            } else {
+                $cmp->row->visible = 1;
+                $cmp->row->save();
+            }
+        }
+        if ($saveParent && $cmp->parent) {
+            $this->_setVisibleRecursive($cmp->parent);
         }
     }
 }
