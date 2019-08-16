@@ -16,7 +16,8 @@ class ExportCommand extends Command
     {
         $this->setName('export')
             ->addOption('component-id', null, InputOption::VALUE_REQUIRED, 'Component ID where the export should start.', 'root')
-            ->addOption('addInvisibleChildComponents', 'aiccmp', InputOption::VALUE_OPTIONAL, 'Include all invisible child-components.')
+            ->addOption('addInvisibleChildComponents', 'aiccmp', InputOption::VALUE_NONE, 'Include all invisible child-components.')
+            ->addOption('isTrl', 't', InputOption::VALUE_NONE, 'Use export to translate for another language (skips invisible pages).')
             ->setDescription('Export Component Content');
     }
 
@@ -31,8 +32,11 @@ class ExportCommand extends Command
 
         while (true) {
             $cmd = "php vendor/bin/component-content-import-export export:worker";
-            if ($input->hasOption('addInvisibleChildComponents')) {
+            if ($input->getOption('addInvisibleChildComponents')) {
                 $cmd .= " --addInvisibleChildComponents";
+            }
+            if ($input->getOption('isTrl')) {
+                $cmd .= " --isTrl";
             }
             $process = new Process($cmd);
 
