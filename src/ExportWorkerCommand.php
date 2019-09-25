@@ -12,7 +12,8 @@ class ExportWorkerCommand extends Command
     protected function configure()
     {
         $this->setName('export:worker')
-            ->addOption('addInvisibleChildComponents', 'aiccmp', InputOption::VALUE_OPTIONAL, 'Include all invisible child-components.')
+            ->addOption('addInvisibleChildComponents', 'aiccmp', InputOption::VALUE_NONE, 'Include all invisible child-components.')
+            ->addOption('isTrl', 't', InputOption::VALUE_NONE, 'Use export to translate for another language (skips invisible pages).')
             //->setHidden(true)
         ;
     }
@@ -27,7 +28,6 @@ class ExportWorkerCommand extends Command
         $queueFile = 'temp/componentContentExportQueue';
 
         while (true) {
-
             $errOutput->writeLn("memory_usage (child): ".(memory_get_usage()/(1024*1024))."MB", OutputInterface::VERBOSITY_VERY_VERBOSE);
             if (memory_get_usage() > 128*1024*1024) {
                 $errOutput->writeln("new process...");
@@ -47,18 +47,24 @@ class ExportWorkerCommand extends Command
             if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
                 $errOutput->write("==> " . $componentId);
             }
-            $page = \Kwf_Component_Data_Root::getInstance()->getComponentById($componentId, array('ignoreVisible' => true));
-            if (!$page) {
-                throw new \Exception("$componentId not found");
-                continue;
-            }
-            if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                $errOutput->writeLn(" :: $page->url");
+            if ($input->getOption('isTrl')) {
+                $page = \Kwf_Component_Data_Root::getInstance()->getComponentById($componentId);
+                if (!$page) {
+                    $errOutput->writeLn("$componentId not found or visible");
+                    continue;
+                }
+            } else {
+                $page = \Kwf_Component_Data_Root::getInstance()->getComponentById($componentId, array('ignoreVisible' => true));
+                if (!$page) {
+                    throw new \Exception("$componentId not found");
+                    continue;
+                }
             }
 
             $select = new \Kwf_Component_Select();
-            if ($input->hasOption('addInvisibleChildComponents')) $select->ignoreVisible(true);
+            if ($input->getOption('addInvisibleChildComponents')) $select->ignoreVisible(true);
             foreach ($page->getChildComponents($select) as $c) {
+                if (\Kwc_Abstract::getFlag($c->componentClass, 'skipContentExportRecursive')) continue;
                 if ($c->parent->componentId != $page->componentId) continue; //skip unique box under other parent
                 $errOutput->writeLn("queued $c->componentId", OutputInterface::VERBOSITY_VERBOSE);
                 $queue[] = $c->componentId;

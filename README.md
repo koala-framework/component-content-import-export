@@ -11,4 +11,6 @@
     
     On convert:to-xliff "-l" or "--source-lang" can be used to define the source-language attribute for the xliff-document. Without the standard "de-AT" is used.
     
-
+    # Translating for Trl-Components
+    ./vendor/bin/component-content-import-export export --component-id=root-master --isTrl | ./vendor/bin/component-content-import-export convert:to-po > out.po
+    ./vendor/bin/component-content-import-export convert:from-po < out.po | ./vendor/bin/component-content-import-export import --subrootId=root-trl --isTrl
