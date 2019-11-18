@@ -26,6 +26,7 @@ class ExportWorkerCommand extends Command
         \Kwf_Util_MemoryLimit::set(512);
 
         $queueFile = 'temp/componentContentExportQueue';
+        $failedExports = array();
 
         while (true) {
             $errOutput->writeLn("memory_usage (child): ".(memory_get_usage()/(1024*1024))."MB", OutputInterface::VERBOSITY_VERY_VERBOSE);
@@ -71,21 +72,35 @@ class ExportWorkerCommand extends Command
                 file_put_contents($queueFile, implode("\n", $queue));
             }
             unset($c);
-            $exportData = \Kwc_Abstract_Admin::getInstance($page->componentClass)->exportContent($page);
-            if (isset($page->generator)) {
-                foreach ($page->generator->exportContent($page) as $k=>$i) {
-                    $exportData['gen_'.$k] = $i;
-                }
-            }
-            if ($exportData) {
-                $errOutput->writeln("<info>Exported $page->dbId</info>");
-                foreach ($exportData as $k=>$i) {
-                    if ($i) {
-                        $output->writeln("$page->dbId:$k ".str_replace("\n", "\\n", $i));
+            try {
+                $exportData = \Kwc_Abstract_Admin::getInstance($page->componentClass)->exportContent($page);
+                if (isset($page->generator)) {
+                    foreach ($page->generator->exportContent($page) as $k=>$i) {
+                        $exportData['gen_'.$k] = $i;
                     }
                 }
+                if ($exportData) {
+                    $errOutput->writeln("<info>Exported $page->dbId</info>");
+                    foreach ($exportData as $k=>$i) {
+                        if ($i) {
+                            $output->writeln("$page->dbId:$k ".str_replace("\n", "\\n", $i));
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                $failedExports[] = $page->dbId;
+                continue;
             }
             unset($page);
+        }
+
+        if (count($failedExports) > 0) {
+            $errOutput->writeLn(count($failedExports) . ' Exports failed:');
+            foreach ($failedExports as $failedExport) {
+                $errOutput->writeLn($failedExport);
+            }
+        } else {
+            $errOutput->writeLn('No errors occurred');
         }
     }
 }
