@@ -88,15 +88,20 @@ class ExportWorkerCommand extends Command
                     }
                 }
             } catch (\Exception $e) {
-                $failedExports[] = $page->dbId;
+                $failedExports[$e->getMessage()][] = $page->dbId;
                 continue;
             }
             unset($page);
         }
 
         if (count($failedExports) > 0) {
-            $errOutput->writeLn(count($failedExports) . ' Exports failed:');
-            foreach ($failedExports as $failedExport) {
+            $errOutput->writeLn('');
+            $errOutput->writeLn('Following Errors occured:');
+            $errOutput->writeLn('');
+            foreach ($failedExports as $message=>$failedExport) {
+                $errOutput->writeLn($message);
+                $errOutput->writeLn('');
+                $errOutput->writeLn('Affected exports:');
                 $errOutput->writeLn($failedExport);
             }
         } else {
