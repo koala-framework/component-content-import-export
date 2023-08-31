@@ -26,7 +26,7 @@ class ConvertFromPoCommand extends ConvertAbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $errOutput = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
-        $contents = $this->readInput($input, $output);
+        $contents = str_replace("\xEF\xBB\xBF",'',$this->readInput($input, $output));
 
         $referenceFileName = $input->getOption('reference-file');
         $referenceFile = null;
